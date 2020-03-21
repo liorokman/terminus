@@ -7,26 +7,6 @@ metadata:
   name: manager-role
 rules:
 - apiGroups:
-  - boundry.terminus
-  resources:
-  - podlimits
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - boundry.terminus
-  resources:
-  - podlimits/status
-  verbs:
-  - get
-  - patch
-  - update
-- apiGroups:
   - ""
   resources:
   - pods

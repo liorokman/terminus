@@ -1,7 +1,4 @@
 domain: terminus
 repo: github.com/liorokman/terminus
 resources:
-- group: boundry
-  kind: PodLimit
-  version: v1alpha1
 version: "2"

@@ -19,7 +19,6 @@ import (
 	"flag"
 	"os"
 
-	boundryv1alpha1 "github.com/liorokman/terminus/api/v1alpha1"
 	"github.com/liorokman/terminus/controllers"
 	"github.com/spf13/viper"
 	corev1 "k8s.io/api/core/v1"
@@ -39,7 +38,6 @@ var (
 func init() {
 	_ = clientgoscheme.AddToScheme(scheme)
 
-	_ = boundryv1alpha1.AddToScheme(scheme)
 	_ = corev1.AddToScheme(scheme)
 	// +kubebuilder:scaffold:scheme
 
@@ -78,14 +76,6 @@ func main() {
 	}
 	setupLog.Info("hostip", "hostip", viper.GetString("host.ip"))
 
-	if err = (&controllers.PodLimitReconciler{
-		Client: mgr.GetClient(),
-		Log:    ctrl.Log.WithName("controllers").WithName("PodLimit"),
-		Scheme: mgr.GetScheme(),
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "PodLimit")
-		os.Exit(1)
-	}
 	if err = (&controllers.PodReconciler{
 		Client: mgr.GetClient(),
 		Log:    ctrl.Log.WithName("controllers").WithName("Pod"),
