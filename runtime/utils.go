@@ -46,7 +46,7 @@ const systemdSuffix string = ".slice"
 
 func cgroupsPathToStaticPath(path string, podLevel bool) string {
 	if !strings.Contains(path, systemdSuffix) {
-		if podLevel {
+		if !podLevel {
 			return path
 		}
 		return filepath.Dir(path)

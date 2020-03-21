@@ -75,11 +75,38 @@ func (r *PodReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		return ctrl.Result{}, err
 	}
 	log.Info("Pod received", "pod", thepod)
+
+	// Set the soft-limit correctly on a per-container basis
+	for _, c := range thepod.Spec.Containers {
+		if req, ok := c.Resources.Requests[corev1.ResourceMemory]; ok {
+			log.Info("Setting reservation limit", "name", c.Name, "request-value", req)
+			for _, cs := range thepod.Status.ContainerStatuses {
+				if c.Name == cs.Name {
+					reqInBytes := req.Value()
+					if cgroup, err := terminusruntime.LoadCgroup(ctx, cs.ContainerID, false); err == nil {
+						err := cgroup.Update(&specs.LinuxResources{
+							Memory: &specs.LinuxMemory{
+								Reservation: &reqInBytes,
+							},
+						})
+						if err != nil {
+							log.Error(err, "Failed to set soft-limit for a container", "name", c.Name)
+						}
+					} else {
+						log.Error(err, "Failed to load the container cgroup", "name", c.Name, "containerID", cs.ContainerID)
+					}
+				}
+			}
+		}
+	}
+
+	// Now fix the top-level cgroups
 	cgroup, err := terminusruntime.LoadCgroup(ctx, thepod.Status.ContainerStatuses[0].ContainerID, true)
 	if err != nil {
 		log.Error(err, "Failed to find the pod cgroup")
 		return ctrl.Result{}, err
 	}
+	log.Info("Cgroup values", "cgroup", cgroup)
 	resourceRequest := specs.LinuxResources{}
 	if quant, ok := podLimits.Limits[corev1.ResourceMemory]; ok {
 		lim := quant.Value()
@@ -96,28 +123,6 @@ func (r *PodReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	if err != nil {
 		log.Error(err, "Failed to update the pod limit")
 		return ctrl.Result{}, err
-	}
-	// Set the soft-limit correctly
-	for _, c := range thepod.Spec.Containers {
-		if req, ok := c.Resources.Requests[corev1.ResourceMemory]; ok {
-			for _, cs := range thepod.Status.ContainerStatuses {
-				if c.Name == cs.Name {
-					reqInBytes := req.Value()
-					if cgroup, err := terminusruntime.LoadCgroup(ctx, cs.ContainerID, false); err != nil {
-						err := cgroup.Update(&specs.LinuxResources{
-							Memory: &specs.LinuxMemory{
-								Reservation: &reqInBytes,
-							},
-						})
-						if err != nil {
-							log.Error(err, "Failed to set soft-limit for a container", "name", c.Name)
-						}
-					} else {
-						log.Error(err, "Failed to load the container cgroup", "name", c.Name)
-					}
-				}
-			}
-		}
 	}
 
 	return ctrl.Result{}, nil
