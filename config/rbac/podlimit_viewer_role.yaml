@@ -1,0 +1,20 @@
+# permissions to do viewer podlimits.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: podlimit-viewer-role
+rules:
+- apiGroups:
+  - boundry.terminus
+  resources:
+  - podlimits
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - boundry.terminus
+  resources:
+  - podlimits/status
+  verbs:
+  - get

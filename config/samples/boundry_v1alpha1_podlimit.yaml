@@ -1,0 +1,7 @@
+apiVersion: boundry.terminus/v1alpha1
+kind: PodLimit
+metadata:
+  name: podlimit-sample
+spec:
+  # Add fields here
+  foo: bar

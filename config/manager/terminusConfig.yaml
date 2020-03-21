@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config
+data:
+  config.yaml: |
+    containerd:
+      address: /run/containerd/containerd.sock
+
