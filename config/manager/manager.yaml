@@ -25,18 +25,13 @@ spec:
       - name: config
         configMap: 
           name: terminus-config
-      - name: containerd-sock 
-        hostPath:
-          path: /run/containerd/containerd.sock
-          type: File
+          optional: true
       - name: cgroupfs
         hostPath:
           path: /sys/fs/cgroup 
       containers:
       - command:
         - /manager
-#        args:
-#        - --enable-leader-election
         image: controller:latest
         name: manager
         securityContext:
@@ -51,6 +46,7 @@ spec:
           mountPath: /etc/terminus
         - name: cgroupfs
           mountPath: /sys/fs/cgroup 
+        # This never changes. The code assumes the socket is mounted here.
         - name: containerd-sock 
           mountPath: /run/containerd/containerd.sock
         resources:

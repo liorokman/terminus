@@ -24,7 +24,7 @@ func LoadCgroup(ctx context.Context, containerID string, podLevel bool) (cgroups
 	default:
 		return nil, errors.New("terminus: Unrecognized container interface")
 	}
-	client, err := containerd.New(viper.GetString("containerd.address"), containerd.WithDefaultNamespace(namespace))
+	client, err := containerd.New(viper.GetString("container.runtime.endpoint"), containerd.WithDefaultNamespace(namespace))
 	if err != nil {
 		return nil, err
 	}
@@ -78,4 +78,37 @@ func cgroupsPathToStaticPath(path string, podLevel bool) string {
 		}
 	}
 	return strings.Join(result, "/")
+}
+
+const (
+	// Taken from lmctfy https://github.com/google/lmctfy/blob/master/lmctfy/controllers/cpu_controller.cc
+	MilliCPUToCPU int64 = 1000
+
+	// 100000 is equivalent to 100ms
+	QuotaPeriod    int64 = 100000
+	MinQuotaPeriod int64 = 1000
+)
+
+// Copied with care from the Kubelet source code.
+// MilliCPUToQuota converts milliCPU to CFS quota and period values.
+func MilliCPUToQuota(milliCPU int64) (quota int64) {
+	// CFS quota is measured in two values:
+	//  - cfs_period_us=100ms (the amount of time to measure usage across given by period)
+	//  - cfs_quota=20ms (the amount of cpu time allowed to be used across a period)
+	// so in the above example, you are limited to 20% of a single CPU
+	// for multi-cpu environments, you just scale equivalent amounts
+	// see https://www.kernel.org/doc/Documentation/scheduler/sched-bwc.txt for details
+
+	if milliCPU == 0 {
+		return
+	}
+
+	// we then convert your milliCPU to a value normalized over a period
+	quota = (milliCPU * QuotaPeriod) / MilliCPUToCPU
+
+	// quota needs to be a minimum of 1ms.
+	if quota < MinQuotaPeriod {
+		quota = MinQuotaPeriod
+	}
+	return
 }

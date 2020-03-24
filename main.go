@@ -45,11 +45,12 @@ func init() {
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath("/etc/terminus")
 	viper.BindEnv("host.ip", "HOST_IP")
+	viper.SetDefault("container.runtime.endpoint", "/run/containerd/containerd.sock")
 	err := viper.ReadInConfig()
-	if err != nil {
-		panic("Failed to load configuration")
+	if err == nil {
+		// Only do this if there was any configuration read in
+		viper.WatchConfig()
 	}
-	viper.WatchConfig()
 }
 
 func main() {

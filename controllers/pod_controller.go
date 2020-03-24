@@ -47,7 +47,7 @@ type LimitAnnotation struct {
 }
 
 // +kubebuilder:rbac:groups=core,resources=pods,verbs=get;list;watch
-// +kubebuilder:rbac:groups=core,resources=pods/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=core,resources=pods/status,verbs=get
 
 func (r *PodReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	ctx := context.Background()
@@ -114,9 +114,13 @@ func (r *PodReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			Limit: &lim,
 		}
 	}
-	if _, ok := podLimits.Limits[corev1.ResourceCPU]; ok {
-		// TODO: Actually do something intelligent here
-		resourceRequest.CPU = &specs.LinuxCPU{}
+	if quant, ok := podLimits.Limits[corev1.ResourceCPU]; ok {
+		quota := terminusruntime.MilliCPUToQuota(quant.Value())
+		period := uint64(terminusruntime.QuotaPeriod)
+		resourceRequest.CPU = &specs.LinuxCPU{
+			Quota:  &quota,
+			Period: &period,
+		}
 	}
 	log.Info("Setting pod level cgroups", "ResourceRequest", resourceRequest)
 	err = cgroup.Update(&resourceRequest)

@@ -1,0 +1,16 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: controller-manager
+  namespace: system
+  labels:
+    control-plane: controller-manager
+spec:
+  template:
+    spec:
+      volumes:
+      - name: containerd-sock
+        hostPath:
+          # Change this to match your environment
+          path: /run/containerd/containerd.sock
+          type: File
