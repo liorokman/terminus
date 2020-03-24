@@ -20,5 +20,3 @@ rules:
   - pods/status
   verbs:
   - get
-  - patch
-  - update

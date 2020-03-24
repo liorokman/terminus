@@ -115,7 +115,7 @@ func (r *PodReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		}
 	}
 	if quant, ok := podLimits.Limits[corev1.ResourceCPU]; ok {
-		quota := terminusruntime.MilliCPUToQuota(quant.Value())
+		quota := terminusruntime.MilliCPUToQuota(quant.MilliValue())
 		period := uint64(terminusruntime.QuotaPeriod)
 		resourceRequest.CPU = &specs.LinuxCPU{
 			Quota:  &quota,

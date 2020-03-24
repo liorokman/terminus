@@ -3,6 +3,8 @@ package runtime
 import (
 	"fmt"
 	"testing"
+
+	"k8s.io/apimachinery/pkg/api/resource"
 )
 
 func TestCgroupsPathToStaticPath(t *testing.T) {
@@ -14,5 +16,12 @@ func TestCgroupsPathToStaticPath(t *testing.T) {
 	res = cgroupsPathToStaticPath("/kubepods/besteffort/pod1423c184-fc22-46cb-afb8-aa5bba016b71/5eb7dbec4ca0eafa656252868970250faa51fe67f15494fb99f2f012daccfa71", true)
 	fmt.Println(res)
 	res = cgroupsPathToStaticPath("/kubepods/besteffort/pod1423c184-fc22-46cb-afb8-aa5bba016b71/5eb7dbec4ca0eafa656252868970250faa51fe67f15494fb99f2f012daccfa71", false)
+	fmt.Println(res)
+}
+
+func TestMilliCPUToQuota(t *testing.T) {
+
+	quant := resource.MustParse("500m")
+	res := MilliCPUToQuota(quant.MilliValue())
 	fmt.Println(res)
 }
