@@ -33,4 +33,4 @@ The value of the annotation is a JSON document containing a standard Kubernetes 
 
 When deployed, terminus starts a Pod watcher on all of the nodes where it is running. Whenever a Pod reaches `Running` state, if it is annotated with a `podlimits.terminus.sap.com/pod-limits` annotation the pod-level cgroup is adjusted as required. For CPU, the pod level quota is set to the provided limit. For memory, the pod level `mem.limit_in_bytes` is set to the provided limit and all cgroups for all containers that provide a request value are updated so that the soft limit (`memory.soft_limit_in_bytes`) is set to the request value for the container.
 
-No validation is made to verify that the pod level limits are larger or equal to container level requests, and no limits are removed form speific containers. 
+No validation is made to verify that the pod level limits are larger or equal to container level requests, and no limits are removed from specific containers. 
